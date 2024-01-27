@@ -26,7 +26,7 @@ type login struct {
 	service service.LoginService
 }
 
-func New(svc service.LoginService) Login {
+func NewRestChannel(svc service.LoginService) Login {
 	return &login{
 		service: svc,
 	}
@@ -44,22 +44,22 @@ func (u *login) Start() error {
 
 	mainGroup := router.Group("/api")
 
-	customerGroup := mainGroup.Group("/user")
-	u.RegisterGroup(customerGroup)
+	authGroup := mainGroup.Group("/user")
+	u.RegisterGroup(authGroup)
 
 	return router.Start(":" + cfg.Server.Port)
 }
 
 func (u *login) Login(c echo.Context) error {
-	var customerLogin LoginRequest
+	var userLogin LoginRequest
 
-	if err := c.Bind(&customerLogin); err != nil {
+	if err := c.Bind(&userLogin); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, Response{
 			Message: fmt.Errorf("invalid data").Error(),
 		})
 	}
 
-	token, err := u.service.Login(c.Request().Context(), customerLogin.toCanonical())
+	token, err := u.service.Login(c.Request().Context(), userLogin.toCanonical())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, Response{err.Error()})
 	}

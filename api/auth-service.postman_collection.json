@@ -1,0 +1,77 @@
+{
+	"info": {
+		"_postman_id": "8045e53d-5c26-4426-826b-03e155581926",
+		"name": "auth-service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "14446658"
+	},
+	"item": [
+		{
+			"name": "Bypass",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{base_url_api_gataway}}/api/user/bypass",
+					"host": [
+						"{{base_url_api_gataway}}"
+					],
+					"path": [
+						"api",
+						"user",
+						"bypass"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"login\":\"login123\",\n    \"password\":\"passwordteste123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url_api_gataway}}/api/user/login",
+					"host": [
+						"{{base_url_api_gataway}}"
+					],
+					"path": [
+						"api",
+						"user",
+						"login"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -1,8 +1,7 @@
 package rest
 
 type LoginRequest struct {
-	Document string `json:"document"`
-	Email    string `json:"email"`
+	Login    string `json:"login"`
 	Password string `json:"password"`
 }
 

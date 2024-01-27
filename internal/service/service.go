@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"tech-challenge-auth/internal/canonical"
-	"tech-challenge-auth/internal/integration/customer"
+	"tech-challenge-auth/internal/repositories"
 	"tech-challenge-auth/internal/security"
 	"tech-challenge-auth/internal/token"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 )
 
@@ -17,30 +19,41 @@ type LoginService interface {
 }
 
 type loginService struct {
-	customer.CustomerService
+	repositories.LoginRepository
 }
 
-func NewLoginService() LoginService {
+func NewLoginService(repo repositories.LoginRepository) LoginService {
 	return &loginService{
-		customer.New(),
+		repo,
 	}
 }
 
-func (u *loginService) Login(ctx context.Context, customer canonical.Login) (string, error) {
-	customerBase, err := u.CustomerService.Get(ctx, customer)
+func (u *loginService) Login(ctx context.Context, user canonical.Login) (string, error) {
+	baseUser, err := u.LoginRepository.GetUserByLogin(ctx, user.Login)
 	if err != nil {
-		err = fmt.Errorf("error getting customer by email: %w", err)
+		err = fmt.Errorf("error getting user by email: %w", err)
 		logrus.WithError(err).Info()
 		return "", err
 	}
 
-	if err = security.CheckPassword(customerBase.Password, customer.Password); err != nil {
+	if err = security.CheckPassword(baseUser.Password, user.Password); err != nil {
 		err = fmt.Errorf("error checking password: %w", err)
 		logrus.WithError(err).Info()
 		return "", err
 	}
 
-	token, _ := token.GenerateToken(customerBase.Document)
+	if err = u.SaveAccess(ctx, canonical.Access{
+		ID:            uuid.New().String(),
+		AccessLevelID: baseUser.AccessLevelID,
+		USERID:        baseUser.Id,
+		AccessedAt:    time.Now(),
+	}); err != nil {
+		err = fmt.Errorf("An expected error occurred")
+		logrus.WithError(err).Error("Error when save access in the database")
+		return "", err
+	}
+
+	token, _ := token.GenerateToken(baseUser.Password)
 
 	return token, nil
 }

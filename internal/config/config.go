@@ -18,9 +18,9 @@ type Config struct {
 	Server struct {
 		Port string `cfg:"port"`
 	} `cfg:"server"`
-	Integration struct {
-		Customer string `cfg:"customer"`
-	}
+	DB struct {
+		ConnectionString string `cfg:"connectionString"`
+	} `cfg:"db"`
 }
 
 func ParseFromFlags() {
