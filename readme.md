@@ -1,5 +1,9 @@
 # FIAP - TechChallenge - Auth Service
 
+## Description
+
+This service is responsable to generate tokens to have authorization to send requests to other services. In this proccess, this service takes the login inputed and searches the user in the postgres-user database, after validation, it saves the access in a table of access and returns the token or an error. We have a diagram about a flow of this service [here](./diagrams/auth-service-diagram.png).
+
 ## Features
 
 - Generate Token
@@ -7,7 +11,7 @@
 
 ## How To Run Locally
 
-First of all we need the DataBase. The database for this application is shared with user-service; the steps to run this database are described there.
+First of all we need the DataBase. The database for this application is shared with user-service; the steps to run this database are described [there](https://github.com/mauriciodm1998/user-service).
 Then you can run the application:
 
 ### VSCode - Debug
@@ -34,4 +38,4 @@ We also have the most recently applied unit tests file in this [folder](/unit-te
 
 ## Infrastructure
 
-This application runs in a k8s cluster. The manifests about the configuration of this application are in this [repository](link-to-gitops).
+This application runs in as a lambda. The terraform about the configuration of this application are in this [repository](https://github.com/mauriciodm1998/tech-challenge-gitops).

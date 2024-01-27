@@ -6,7 +6,7 @@ RUN mkdir app
 COPY . app
 WORKDIR app
 RUN go test ./... -coverprofile cover.out -tags=test && go tool cover -html=cover.out
-RUN CGO_ENABLED=0 go build -v -o dist/auth-service cmd/auth/main.go
+RUN CGO_ENABLED=0 go test ./... -coverprofile cover.out -tags=test && go tool cover -html=cover.out && go build -v -o dist/auth-service cmd/auth/main.go
 
 FROM alpine:latest as baker
 
