@@ -17,4 +17,4 @@ jobs:
       - name: Install dependencies
         run: go get ./...
       - name: Build
-        run: CGO_ENABLED=0 go build -v -o dist/tech-challenge-auth cmd/auth/main.go
+        run: CGO_ENABLED=0 go build -v -o dist/auth-service cmd/auth/main.go
