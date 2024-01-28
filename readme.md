@@ -2,7 +2,7 @@
 
 ## Description
 
-This service is responsable to generate tokens to have authorization to send requests to other services. In this proccess, this service takes the login inputed and searches the user in the postgres-user database, after validation, it saves the access in a table of access and returns the token or an error. We have a diagram about a flow of this service [here](./diagrams/auth-service-diagram.png).
+This service is responsable to generate tokens to have authorization to send requests to other services. In this proccess, this service takes the login inputed and searches the user in the postgres-user database, after validation, it saves the access in a table of access and returns the token or an error. We have a diagram about a flow of this service here: [login flow](./diagrams/auth-service-diagram.png), [bypass flow](./diagrams/bypass-diagram.png)
 
 ## Features
 
