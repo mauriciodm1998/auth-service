@@ -3,6 +3,7 @@ package main
 import (
 	"tech-challenge-auth/internal/channels/rest"
 	"tech-challenge-auth/internal/config"
+	"tech-challenge-auth/internal/repositories"
 	"tech-challenge-auth/internal/service"
 
 	"github.com/sirupsen/logrus"
@@ -11,8 +12,8 @@ import (
 func main() {
 	config.ParseFromFlags()
 
-	service := service.NewLoginService()
-	if err := rest.New(service).Start(); err != nil {
+	service := service.NewLoginService(repositories.NewUserRepo(repositories.New()))
+	if err := rest.NewRestChannel(service).Start(); err != nil {
 		logrus.Panic()
 	}
 }

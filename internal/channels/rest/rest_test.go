@@ -1,126 +1,117 @@
 package rest
 
 import (
-	"fmt"
+	"bytes"
+	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"tech-challenge-auth/internal/canonical"
-	"tech-challenge-auth/internal/service"
+	"tech-challenge-auth/internal/mocks"
 	"testing"
 	"time"
 
 	"github.com/labstack/echo"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/suite"
+	"github.com/stretchr/testify/assert"
 )
 
-type restTests struct {
-	suite.Suite
-	serviceMock *service.MockService
+var (
+	svc *mocks.MockService
 
-	server *echo.Echo
-	rest   Login
+	rest Login
+)
+
+func init() {
+	svc = new(mocks.MockService)
+
+	rest = NewRestChannel(svc)
 }
 
-func Test(t *testing.T) {
-	suite.Run(t, new(restTests))
-}
-
-func (t *restTests) SetupSuite() {
-	t.serviceMock = new(service.MockService)
-
-	t.server = echo.New()
-	t.rest = &login{
-		service: t.serviceMock,
-	}
-}
-
-func (t *restTests) TestStart() {
+func TestStart(t *testing.T) {
 	go func() {
-		err := t.rest.Start()
-		t.NoError(err) // Verifique se não há erro ao iniciar o servidor
+		err := rest.Start()
+		assert.NoError(t, err)
 	}()
 
 	<-time.After(100 * time.Millisecond)
 }
 
-func (t *restTests) TestLogin() {
-	testCases := map[string]struct {
-		input          string
-		documentKey    string
-		serviceError   error
-		expectedResult string
-		expectedError  *echo.HTTPError
-	}{
-		"sucess": {
-			input: `
-					{
-						"document": "446.842.868-60",
-						"email":    "mauriciodmpires1@gmail.com",
-						"password": "pass123"
-					}
-					`,
-			documentKey: "446.842.868-60",
-			expectedResult: `{"token":"thisisatoken"}
-`,
-		},
-		"invalid input": {
-			expectedError: echo.NewHTTPError(http.StatusBadRequest, Response{
-				Message: fmt.Errorf("invalid data").Error(),
-			}),
-		},
-		"service error": {
-			input: `
-			{
-				"document": "446.842.555-60",
-				"email":    "mauriciodmpires1@gmail.com",
-				"password": "pass123"
-			}
-			`,
-			documentKey:  "446.842.555-60",
-			serviceError: fmt.Errorf("service error"),
-			expectedError: echo.NewHTTPError(http.StatusInternalServerError, Response{
-				Message: fmt.Errorf("service error").Error(),
-			}),
-		},
+func TestLogin(t *testing.T) {
+	login := canonical.Login{
+		Login:    "loginfulano",
+		Password: "12345",
 	}
 
-	for name, tc := range testCases {
-		t.Run(name, func() {
-			req := httptest.NewRequest(http.MethodPost, "/login", strings.NewReader(tc.input))
-			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-			rec := httptest.NewRecorder()
-			context := t.server.NewContext(req, rec)
+	svc.MockLogin(login, "fake-token", nil, 1)
 
-			if tc.documentKey != "" {
-				t.serviceMock.On("Login", mock.MatchedBy(func(l canonical.Login) bool {
-					return l.Document == tc.documentKey
-				})).Return("thisisatoken", tc.serviceError).Times(1)
-			}
-
-			err := t.rest.Login(context)
-			if err != nil {
-				t.Equal(tc.expectedError, err)
-			} else {
-				t.Equal(tc.expectedResult, rec.Body.String())
-				t.Nil(err)
-			}
-		})
+	request := LoginRequest{
+		Login:    "loginfulano",
+		Password: "12345",
 	}
+
+	req := createJsonRequest(http.MethodPost, "/login", request)
+
+	rec := httptest.NewRecorder()
+
+	err := rest.Login(echo.New().NewContext(req, rec))
+
+	assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
+	assert.Nil(t, err)
+	svc.AssertExpectations(t)
 }
 
-func (t *restTests) TestBypass() {
+func TestLoginError(t *testing.T) {
+	login := canonical.Login{
+		Login:    "loginfulano",
+		Password: "12345",
+	}
+
+	svc.MockLogin(login, "fake-token", errors.New("generic error"), 1)
+
+	request := LoginRequest{
+		Login:    "loginfulano",
+		Password: "12345",
+	}
+
+	req := createJsonRequest(http.MethodPost, "/login", request)
+
+	rec := httptest.NewRecorder()
+
+	err := rest.Login(echo.New().NewContext(req, rec))
+
+	assert.Error(t, err)
+	svc.AssertExpectations(t)
+}
+
+func TestLoginErrorBind(t *testing.T) {
+	req := createJsonRequest(http.MethodPost, "/login", "")
+
+	rec := httptest.NewRecorder()
+
+	err := rest.Login(echo.New().NewContext(req, rec))
+
+	assert.Equal(t, "code=400, message={invalid data}", err.Error())
+	svc.AssertExpectations(t)
+}
+
+func TestBypass(t *testing.T) {
 	expectedResult := `{"token":"fakebypasstoken"}
 `
-
 	req := httptest.NewRequest(http.MethodPost, "/login", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
-	context := t.server.NewContext(req, rec)
 
-	result := t.rest.Bypass(context)
+	svc.MockBypass("fakebypasstoken", nil, 1)
 
-	t.Nil(result)
-	t.Equal(expectedResult, rec.Body.String())
+	err := rest.Bypass(echo.New().NewContext(req, rec))
+
+	assert.Equal(t, expectedResult, rec.Body.String())
+	assert.Nil(t, err)
+}
+
+func createJsonRequest(method, endpoint string, request interface{}) *http.Request {
+	json, _ := json.Marshal(request)
+	req := httptest.NewRequest(method, endpoint, bytes.NewReader(json))
+	req.Header.Set("Content-Type", "application/json")
+	return req
 }
