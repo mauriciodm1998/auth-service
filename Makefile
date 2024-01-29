@@ -1,6 +1,3 @@
-run-app:
-	go run cmd/auth/main.go
-
 test-build-bake:
 	docker build -t auth-service . -f build/Dockerfile
 

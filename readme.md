@@ -2,7 +2,7 @@
 
 ## Description
 
-This service is responsable to generate tokens to have authorization to send requests to other services. In this proccess, this service takes the login inputed and searches the user in the postgres-user database, after validation, it saves the access in a table of access and returns the token or an error. We have a diagram about a flow of this service here: [login flow](./docs/diagrams/auth-service-diagram.png), [bypass flow](./docs/diagrams/bypass-diagram.png)
+This service is responsible to generate tokens to have authorization to send requests to other services. In this proccess, this service takes the login inputed and searches the user in the postgres-user database, after validation, it saves the access in a table of access and returns the token or an error. We have a diagram about a flow of this service here: [login flow](./docs/diagrams/auth-service-diagram.png), [bypass flow](./docs/diagrams/bypass-diagram.png).
 
 ## Features
 
@@ -17,12 +17,6 @@ Then you can run the application:
 ### VSCode - Debug
 The launch.json file is already configured for debuging. Just hit F5 and be happy.
 
-### Running directly from go
-
-Option 1: $```go run cmd/auth/main.go```
-
-Option 2: $```make run-app```
-
 ## Manually testing the API
 
 On directory ```/api``` there's a collection that can be imported on Insomnia or similar so you can test manually the application's API.
@@ -30,7 +24,7 @@ On directory ```/api``` there's a collection that can be imported on Insomnia or
 ## Running the unit tests
 
 Simply run ```make run-tests``` and let the magic happens. At the end it will automatically open an html with the coverage % for every package.
-We also have the most recently applied unit tests file in this [folder](./docs/unit-tests-results/unit-tests.png) too.
+We also have the most recently applied unit tests file in this [folder](./docs/unit-tests-results/unit-tests.png) too. And there is a html file about the last unit tests [execution](./docs/unit-tests-results/coverage.html).
 
 ## Test + Build + Bake Image
 
