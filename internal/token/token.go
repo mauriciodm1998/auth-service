@@ -7,10 +7,6 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
-var (
-	cfg = &config.Cfg
-)
-
 func GenerateToken(userId string) (string, error) {
 	permissions := jwt.MapClaims{}
 
@@ -22,5 +18,5 @@ func GenerateToken(userId string) (string, error) {
 	permissions["userId"] = userId
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, permissions)
 
-	return token.SignedString([]byte(cfg.Token.Key))
+	return token.SignedString([]byte(config.Cfg.Token.Key))
 }

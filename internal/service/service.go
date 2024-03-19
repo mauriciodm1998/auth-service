@@ -48,12 +48,11 @@ func (u *loginService) Login(ctx context.Context, user canonical.Login) (string,
 		USERID:        baseUser.Id,
 		AccessedAt:    time.Now(),
 	}); err != nil {
-		err = fmt.Errorf("An expected error occurred")
 		logrus.WithError(err).Error("Error when save access in the database")
 		return "", err
 	}
 
-	token, _ := token.GenerateToken(baseUser.Password)
+	token, _ := token.GenerateToken(baseUser.Id)
 
 	return token, nil
 }
