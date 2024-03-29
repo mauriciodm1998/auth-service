@@ -19,7 +19,7 @@ type Config struct {
 		Port string `cfg:"port"`
 	} `cfg:"server"`
 	DB struct {
-		ConnectionString string `cfg:"connectionString"`
+		ConnectionString string `cfg:"connection_string"`
 	} `cfg:"db"`
 }
 

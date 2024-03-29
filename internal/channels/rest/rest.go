@@ -20,6 +20,7 @@ type Login interface {
 	Login(echo.Context) error
 	Bypass(echo.Context) error
 	Start() error
+	HealthCheck(c echo.Context) error
 }
 
 type login struct {
@@ -43,11 +44,16 @@ func (u *login) Start() error {
 	router.Use(middlewares.Logger)
 
 	mainGroup := router.Group("/api")
+	mainGroup.GET("/healthz", u.HealthCheck)
 
 	authGroup := mainGroup.Group("/user")
 	u.RegisterGroup(authGroup)
 
 	return router.Start(":" + cfg.Server.Port)
+}
+
+func (r *login) HealthCheck(c echo.Context) error {
+	return c.NoContent(http.StatusOK)
 }
 
 func (u *login) Login(c echo.Context) error {
